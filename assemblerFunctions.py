@@ -6,37 +6,32 @@ import re
 def formatAndResolveInstructions(lines):
     def differentiateLine(line):
         if('(' in line):
-            tokens = line.replace(',', '').replace('\n', '').replace(':', '').replace('(', ' ').replace(')', '').split()
+            tokens = line.replace(',', ' ').replace('\n', '').replace(':', ' ').replace('(', ' ').replace(')', ' ').split()
             temp = tokens[2]
             tokens[2] = tokens[3]
             tokens[3] = temp
         else:
-            tokens = line.replace(',', '').replace('\n', '').replace(':', '').split()
+            tokens = line.replace(',', ' ').replace('\n', '').replace(':', ' ').split()
 
         #if has no label
         if tokens[0] in mipsDictionaries.instructions:
-            tokens = [""] + tokens
-        while(len(tokens) < 5):
-            tokens = tokens + [""]
+            tokens = [''] + tokens
+        tokens += [''] * (5-len(tokens)) #fills the other 5 slots with ''
         return tokens
 
     def resolvePseudoInstructions(line):
-        if mipsDictionaries.instructions[line[1]] != 3: #3 is NOT pseudo
-            return line
+        if mipsDictionaries.instructions[line[1]] != 3: #is NOT pseudo
+            return [line]
         instructionList = []
-        instructions = mipsDictionaries.pseudoInstructionResolution[line[1]]
-        for instruction in instructions:
-            instructionList.append(instruction.replace("LABEL", line[4]).replace('A', line[2]).replace('B', line[3]))
+        for instruction in mipsDictionaries.pseudoInstructionResolution[line[1]]:
+            instructionList.append(differentiateLine(instruction.replace("LABEL", line[4]).replace('A', line[2]).replace('B', line[3])))
         return instructionList
 
-    lines = [differentiateLine(i) for i in lines]
+    lines = [differentiateLine(i.lower()) for i in lines if i[0]!='\n']
     pseudoResolvedLines = []
     for line in lines:
-        if mipsDictionaries.instructions[line[1]] != 3: #3 is NOT pseudo
-            pseudoResolvedLines.append(line)
-        else:
-            for instruction in resolvePseudoInstructions(line):
-                pseudoResolvedLines.append(differentiateLine(instruction))
+        for instruction in resolvePseudoInstructions(line):
+            pseudoResolvedLines.append(instruction)
 
     return pseudoResolvedLines
 
@@ -54,26 +49,28 @@ def calculateLabelAddresses(lines, offset):
     return labels
 
 #RUN 3, replace labels with addresses and registers with values
-#DESTRUCTIVE!
 def resolveLabelsAndRegisters(lines, labels, registers):
-    for instructionIndex in range(len(lines)):
-        for tokenIndex in range(len(lines[instructionIndex])):
-            if tokenIndex == 0 or tokenIndex == 1:
+    newLines = []
+    for instruction in lines:
+        newInstruction = []
+        for token in instruction:
+            if token == '' or\
+            token.isnumeric() or\
+                token in mipsDictionaries.instructions:
+                newInstruction.append(token)
                 continue
-            if lines[instructionIndex][tokenIndex] == '' or\
-            lines[instructionIndex][tokenIndex].isnumeric():
-                continue
-            if lines[instructionIndex][tokenIndex][0] == '$':
-                lines[instructionIndex][tokenIndex] = registers.get(
-                    lines[instructionIndex][tokenIndex],
+            if token[0] == '$':
+                newInstruction.append(registers.get(
+                    token,
                     "UNRESOLVED_REGISTER"
-                )
+                ))
             else:
-                lines[instructionIndex][tokenIndex] = labels.get(
-                    lines[instructionIndex][tokenIndex],
+                newInstruction.append(labels.get(
+                    token,
                     "UNRESOLVED_LABEL"
-                )
-    return lines
+                ))
+        newLines.append(newInstruction)
+    return newLines
 
 #RUN 4, convert instructions to binary
 def toBinaryInstructions(lines):
@@ -117,3 +114,23 @@ def fullProcedure(lines, offset):
     lines = toBinaryInstructions(lines)#RUN 4
     lines = toHexInstructions(lines)#RUN 5
     return lines
+
+def verifyDictionaries():
+    def verifyDictionary(dict, msg):
+        print(msg)
+        for item in dict:
+            incidence = 0
+            for comparator in dict:
+                if item == comparator:
+                    incidence+=1
+                    if incidence > 1:
+                        print(item + ": occurs more than once!")
+                        return "BAD"
+            if item != "NAME":
+                print(item + ": " + str(item in mipsDictionaries.instructions.keys()))
+    
+    verifyDictionary(mipsDictionaries.RFunction, "Checking R type function codes: ")
+    verifyDictionary(mipsDictionaries.opcode, "Checking opcodes: ")
+    verifyDictionary(mipsDictionaries.pseudoInstructionResolution, "Checking pseudo: ")
+    
+    return "GOOD"

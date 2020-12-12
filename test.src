@@ -1,5 +1,11 @@
 else: add $s0, $zero, $zero
-loop: addi $s0, $s0, 50
+and $s0, $zero, $zero
+loop1: addi $s0, $s0, 50
 j else
 blt $s0, $s1 loop
 lw $s0, 48($s5)
+
+Loop: beq $s0, $s2, Exit
+add $s0, $s0, $s1
+j Loop
+Exit: add $s0, $zero, $zero

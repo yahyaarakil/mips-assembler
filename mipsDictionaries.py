@@ -3,43 +3,100 @@
 # 2 = J type
 # 3 = pseudo
 
+#determine instruction type
 instructions = {
+    "NAME": "instructions",
+
     #R type
     "add": 0,
+    "and": 0,
     "slt": 0,
+    "nor": 0,
+    "or": 0,
+    "sra": 0,
+    "srl": 0,
+    "xor": 0,
 
     #I type
     "addi": 1,
     "bne": 1,
     "lw": 1,
+    "andi": 1,
+    "beq": 1,
+    "lb": 1,
+    "lbu": 1,
+    "lh": 1,
+    "lhu": 1,
+    "ori": 1,
+    "sb": 1,
+    "slti": 1,
+    "sh": 1,
+    "sw": 1,
+    "xori": 1,
 
     #J type
     "j": 2,
+    "jal": 2,
 
     #Pseudo
     "blt": 3,
 }
 
+#resolution pattern
 pseudoInstructionResolution = {
-    "blt": ("slt $at, A, B", "bne $at, $zero, LABEL"),
+    "NAME": "pseudo instruction resolution",
+
+    "blt": ("slt $at, A, B", "bne $at, $zero, LABEL"), #resolves into 2 real instructions
 }
 
+#determine opcode
 opcode = {
+    "NAME": "opcode",
+
     "add": "000000",
     "slt": "000000",
+    "and": "000000",
+    "nor": "000000",
+    "or": "000000",
+    "sra": "000000",
+    "srl": "000000",
+    "xor": "000000",
 
     "addi": "001000",
     "bne": "000101",
     "lw": "100011",
+    "andi": "001100",
+    "beq": "000100",
+    "lb": "100000",
+    "lbu": "100100",
+    "lh": "100001",
+    "lhu": "100101",
+    "ori": "001101",
+    "sb": "101000",
+    "slti": "001010",
+    "sh": "101001",
+    "sw": "101011",
+    "xori": "001110",
 
     "j": "000010",
+    "jal": "000011",
 }
 
+#for R type, determine function
 RFunction = {
+    "NAME": "R function",
+
     "add": "100000",
+    "and": "100100",
     "slt": "101010",
+    "nor": "100111",
+    "or": "100101",
+    "sra": "000011",
+    "srl": "000010",
+    "xor": "100110",
 }
 
+#registers
 registers = {
     "$zero": 0,
     "$at": 1,
