@@ -1,0 +1,5 @@
+else: add $s0, $zero, $zero
+loop: addi $s0, $s0, 50
+j else
+blt $s0, $s1 loop
+lw $s0, 48($s5)
