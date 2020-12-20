@@ -74,6 +74,7 @@ instructions = {
     "move": 3,
 }
 
+#if resolving to only ONE instruction you should use a LIST, cuz a tuple of one is not a tuple
 def pseudoRes(pseudo, A, B, C):
     if pseudo == "blt":
         return("slt $at, " + A + ", " + B + "", "bne $at, $zero, " + C)
@@ -88,7 +89,7 @@ def pseudoRes(pseudo, A, B, C):
     elif pseudo == "abs":
         return ("addu " + A + ", " + B + ", $zero", "bgez " + B + ", 8", "sub " + A + ", " + B + ", $zero")
     elif pseudo == "move":
-        return ("add " + A + ", " + B + ", $zero")
+        return ["add " + A + ", " + B + ", $zero"]
    
 
 #registers
@@ -134,3 +135,16 @@ registers = {
     "$fp": 30,
     "$ra": 31,
 }
+
+if __name__ == "__main__":
+    for item in instructions.keys():
+        print(item, end = "")
+        if(instructions[item] == 3):
+            print(": Pseduo instruction")
+        else:
+            if (instructions[item][0] == RInstruction):
+                print(": R instruction")
+            elif (instructions[item][0] == IInstruction):
+                print(": I instruction")
+            elif (instructions[item][0] == JInstruction):
+                print(": J instruction")

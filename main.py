@@ -9,7 +9,7 @@ def setVerbose(i):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        offset = 0
+        offset = 4194304
         verbose = False
         if len(sys.argv) > 2:
             if sys.argv[2].isnumeric():
@@ -22,12 +22,26 @@ if __name__ == "__main__":
         lines = assemblyFile.readlines()#read all lines
         assembledFile = open(sys.argv[1].replace('.src', '.obj'), "w")
         try:
-            lines = [i+'\n' for i in fullProcedure(lines, offset, True)]
+            lines = [i+'\n' for i in fullProcedure(lines, offset, verbose)]
         except Exception as e:
             print(e)
             exit(1)
         assembledFile.writelines(lines)
         print("Assembled successfully, written to " + sys.argv[1].replace('.src', '.obj'))
     else:
-        while(True):
-            print(fullProcedure([input(">>> ")], 0))
+        lines = []
+        print("Type EXIT to exit")
+        try:
+            answer = input(">>> ")
+            while answer != "EXIT":
+                try:
+                    lines.append(answer)
+                    assembled = [i+'\n' for i in fullProcedure(lines, 0, False)]
+                    print(assembled[len(assembled) - 1])
+                    answer = input(">>> ")
+                except Exception as e:
+                    print(e)
+                    lines.remove(lines[len(lines) - 1])
+                    answer = input(">>> ")
+        except KeyboardInterrupt:
+            print("Exiting!")

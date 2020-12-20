@@ -4,6 +4,7 @@ import mipsDictionaries
 
 def parseInstructions(lines):
     def differentiateLine(line, lineNumber):
+        line = line.split('#')[0]
         tokens = (line.replace(',', ' ').replace('\n', '').replace(':', ' ').replace('(', ' ').replace(')', ' ')).split()
         #if has no label
         if tokens[0] in mipsDictionaries.instructions:
@@ -14,12 +15,13 @@ def parseInstructions(lines):
 
     def resolvePseudoInstructions(line):
         if mipsDictionaries.instructions.get(line[1], -1) == -1: #is NOT recognized
-            raise Exception("instruction " + line[1] + " at line " + str(line[5]) +" is not recognized ")
+            raise Exception("instruction at line " + str(line[5]) +" is not recognized ")
         elif mipsDictionaries.instructions.get(line[1], 0) != 3: #is NOT pseudo
             return [line]
         instructionList = []
         for instruction in mipsDictionaries.pseudoRes(line[1], line[2], line[3], line[4]):
             instructionList.append(differentiateLine(instruction, "Pseudo"))
+        instructionList[0][0] = line[0]
         return instructionList
 
     def convertToBP(instruction):
@@ -39,7 +41,7 @@ def parseInstructions(lines):
     lineNumber = 1
     newLines = []
     for line in lines:
-        if line[0]!='\n' and line[0] != '#':
+        if line[0]!='\n' and line[0] != '#' and line != "":
             newLines.append(differentiateLine(line, lineNumber))
         lineNumber += 1
     lines = newLines
@@ -49,6 +51,17 @@ def parseInstructions(lines):
             pseudoResolvedLines.append(convertToBP(instruction))
 
     return pseudoResolvedLines
+
+def verifyImmediates(lines):
+    for instruction in lines:
+        if "immediate" in instruction:
+            if int(instruction["immediate"]) > (2**16):
+                raise Exception("immediate is too large at line " + str(instruction["line_number"]))
+        if "sa" in instruction:
+            if int(instruction["sa"]) > 2**5:
+                raise Exception("shift amount is too large at line " + str(instruction["line_number"]))
+
+    return lines
 
 
 def calculateLabelAddresses(lines, offset):
@@ -148,6 +161,7 @@ def fullProcedure(lines, offset, verbose):
     if verbose:
         for line in lines:
             print(str(line))
+    lines = verifyImmediates(lines)
     labels = calculateLabelAddresses(lines, offset)
     if verbose:
         for line in labels:
