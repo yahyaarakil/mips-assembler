@@ -3,6 +3,10 @@ IInstruction = "opcode rs rt immediate"
 JInstruction = "opcode target"
 Ropcode = "000000"
 
+#all supported instructions are listed here,
+#instruciton name, how it's supposed to be compiled,
+#and how it's written
+
 instructions = {
     #R type, Outblueprint, opcode, inblueprint, funct
     "add": (RInstruction, Ropcode, "rd rs rt ", "100000"),
@@ -74,7 +78,6 @@ instructions = {
     "move": 3,
 }
 
-#if resolving to only ONE instruction you should use a LIST, cuz a tuple of one is not a tuple
 def pseudoRes(pseudo, A, B, C):
     if pseudo == "blt":
         return("slt $at, " + A + ", " + B + "", "bne $at, $zero, " + C)
@@ -89,7 +92,7 @@ def pseudoRes(pseudo, A, B, C):
     elif pseudo == "abs":
         return ("addu " + A + ", " + B + ", $zero", "bgez " + B + ", 8", "sub " + A + ", " + B + ", $zero")
     elif pseudo == "move":
-        return ["add " + A + ", " + B + ", $zero"]
+        return ("add " + A + ", " + B + ", $zero",)
    
 
 #registers
